@@ -6,13 +6,14 @@ from re import sub
 
 class DensityRatio:
     """Density Ratio."""
-    def __init__(self, method, alpha, theta, lambda_, alpha_PE, alpha_KL, kernel_info, compute_density_ratio):
+    def __init__(self, method, alpha, theta, lambda_, alpha_PE, alpha_KL, alpha_TV, kernel_info, compute_density_ratio):
         self.method = method
         self.alpha = alpha
         self.theta = theta
         self.lambda_ = lambda_
         self.alpha_PE = alpha_PE
         self.alpha_KL = alpha_KL
+        self.alpha_TV = alpha_TV
         self.kernel_info = kernel_info
         self.compute_density_ratio = compute_density_ratio
 
@@ -33,6 +34,8 @@ Regularization Parameter (lambda): %(lambda_)s
 Alpha-Relative PE-Divergence: %(alpha_PE)s
 
 Alpha-Relative KL-Divergence: %(alpha_KL)s
+
+Alpha-Relative Total Variation: %(alpha_TV)s
 
 Function to Estimate Density Ratio:
   compute_density_ratio(x)

@@ -10,7 +10,7 @@ References:
         Journal of Machine Learning Research 10 (2009) 1391-1445.
 """
 
-from numpy import inf, array, exp, matrix, diag, multiply, ones, asarray, log
+from numpy import inf, array, exp, matrix, diag, multiply, ones, asarray, log, mean, abs
 from numpy.random import randint
 from numpy.linalg import norm, solve
 from .density_ratio import DensityRatio, KernelInfo
@@ -118,16 +118,34 @@ def RuLSIF(x, y, alpha, sigma_range, lambda_range, kernel_num=100, verbose=True)
         divergence = log(g_x).sum(axis=0) / n
         return divergence
 
+    # Compute the approximate alpha-relative total variation, given samples x and y from the respective distributions.
+    def alpha_total_variation(x, y):
+        # This is Y, in Reference 1.
+        x = to_numpy_matrix(x)
+
+        # Obtain alpha-relative density ratio at these points.
+        g_x = alpha_density_ratio(x)
+
+        # This is Y', in Reference 1.
+        y = to_numpy_matrix(y)
+
+        # Obtain alpha-relative density ratio at these points.
+        g_y = alpha_density_ratio(y)
+
+        return alpha * mean(abs(g_x - 1)) + (1 - alpha) * mean(abs(g_y - 1))
+
     alpha_PE = alpha_PE_divergence(x, y)
     alpha_KL = alpha_KL_divergence(x, y)
+    alpha_TV = alpha_total_variation(x, y)
 
     if verbose:
         print("Approximate alpha-relative PE-divergence = {:03.2f}".format(alpha_PE))
         print("Approximate alpha-relative KL-divergence = {:03.2f}".format(alpha_KL))
+        print("Approximate alpha-relative total variation = {:03.2f}".format(alpha_TV))
 
     kernel_info = KernelInfo(kernel_type="Gaussian", kernel_num=kernel_num, sigma=sigma, centers=centers)
     result = DensityRatio(method="RuLSIF", alpha=alpha, theta=theta, lambda_=lambda_, alpha_PE=alpha_PE, alpha_KL=alpha_KL,
-                          kernel_info=kernel_info, compute_density_ratio=alpha_density_ratio)
+                          alpha_TV=alpha_TV, kernel_info=kernel_info, compute_density_ratio=alpha_density_ratio)
 
     if verbose:
         print("RuLSIF completed.")
